@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Modern Stopwatch</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: white;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 500px;
+        padding: 30px 20px;
+        text-align: center;
+    }
+
+    /* Heading */
+    .title {
+        font-size: 28px;
+        margin-bottom: 30px;
+        letter-spacing: 2px;
+    }
+
+    /* Stopwatch Circle */
+    .watch {
+        width: 300px;
+        height: 300px;
+        margin: auto;
+
+        border-radius: 50%;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        background:
+            radial-gradient(circle, #111827 58%, transparent 59%),
+            conic-gradient(
+                #38bdf8,
+                #6366f1,
+                #a855f7,
+                #38bdf8
+            );
+
+        box-shadow:
+            0 0 30px rgba(56, 189, 248, 0.3),
+            inset 0 0 25px rgba(0, 0, 0, 0.8);
+
+        position: relative;
+    }
+
+    .watch::before {
+        content: "";
+        position: absolute;
+        width: 265px;
+        height: 265px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.08);
+    }
+
+    #timer {
+        font-size: 42px;
+        letter-spacing: 3px;
+        z-index: 2;
+        font-weight: bold;
+    }
+
+    /* Buttons */
+    .buttons {
+        margin-top: 35px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .btn {
+        width: 58px;
+        height: 58px;
+
+        border: none;
+        border-radius: 50%;
+
+        font-size: 23px;
+        cursor: pointer;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        background: #1e293b;
+        color: white;
+
+        box-shadow:
+            0 6px 15px rgba(0, 0, 0, 0.4);
+
+        transition: 0.25s;
+    }
+
+    .btn:hover {
+        transform: translateY(-5px) scale(1.05);
+    }
+
+    .btn:active {
+        transform: scale(0.9);
+    }
+
+    .btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Different button colors */
+    #start {
+        background: #22c55e;
+    }
+
+    #store {
+        background: #3b82f6;
+    }
+
+    #stop {
+        background: #ef4444;
+    }
+
+    #clear {
+        background: #f59e0b;
+    }
+
+    /* Lap Section */
+    .laps {
+        margin-top: 35px;
+        text-align: left;
+    }
+
+    .laps h2 {
+        text-align: center;
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    #listlap {
+        list-style: none;
+        max-height: 180px;
+        overflow-y: auto;
+    }
+
+    #listlap li {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+
+        margin: 8px 0;
+        padding: 12px 18px;
+
+        border-radius: 12px;
+
+        display: flex;
+        justify-content: space-between;
+
+        
+    }
+
+    #listlap li::before {
+        content: "Lap";
+        color: #38bdf8;
+        font-weight: bold;
+    }
+
+    /* Scrollbar */
+    #listlap::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    #listlap::-webkit-scrollbar-thumb {
+        background: #38bdf8;
+        border-radius: 10px;
+    }
+
+    /* Mobile */
+    @media (max-width: 450px) {
+
+        .watch {
+            width: 260px;
+            height: 260px;
+        }
+
+        .watch::before {
+            width: 230px;
+            height: 230px;
+        }
+
+        #timer {
+            font-size: 32px;
+        }
+
+        .buttons {
+            gap: 12px;
+        }
+
+        .btn {
+            width: 52px;
+            height: 52px;
+            font-size: 20px;
+        }
+
+        .title {
+            font-size: 23px;
+        }
+    }
+</style>
+
+
+</head>
+
+<body>
+
+
+<div class="container">
+
+    <h1 class="title">⏱️ STOPWATCH</h1>
+
+    <!-- Circular Stopwatch -->
+    <div class="watch">
+        <h1 id="timer">00:00:00</h1>
+    </div>
+
+    <!-- Icon Buttons -->
+    <div class="buttons">
+
+        <button id="start" class="btn" title="Start">
+            ▶
+        </button>
+
+        <button id="store" class="btn" title="Store Lap" disabled>
+            📌
+        </button>
+
+        <button id="stop" class="btn" title="Stop">
+            ⏹
+        </button>
+
+        <button id="clear" class="btn" title="Clear">
+            ↻
+        </button>
+
+    </div>
+
+    <!-- Lap List -->
+    <div class="laps">
+
+        <h2>📋 Lap Times</h2>
+
+        <ul id="listlap"></ul>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let start = document.getElementById("start");
+    let store = document.getElementById("store");
+    let stop = document.getElementById("stop");
+    let clear = document.getElementById("clear");
+
+    let display = document.getElementById("timer");
+    let ul = document.getElementById("listlap");
+
+    let second = 0;
+    let timer = null;
+    let array = [];
+
+
+    // STORE / LAP
+    store.addEventListener("click", function () {
+
+        array.push(display.innerText);
+
+        console.log(array);
+
+        ul.innerHTML = "";
+
+        for (let i = 0; i < array.length; i++) {
+
+            ul.innerHTML += `
+                <li>
+                    <span>${array[i]}</span>
+                </li>
+            `;
+        }
+
+
+        // After 5 laps
+        if (array.length == 5) {
+
+            second = 0;
+
+            clearInterval(timer);
+
+            start.disabled = false;
+
+            array = [];
+
+            store.disabled = true;
+
+            display.innerText = "00:00:00";
+        }
+
+    });
+
+
+    // CLEAR
+    clear.addEventListener("click", function () {
+
+        second = 0;
+
+        clearInterval(timer);
+
+        start.disabled = false;
+
+        store.disabled = true;
+
+        display.innerText = "00:00:00";
+
+        ul.innerHTML = "";
+
+        array = [];
+
+    });
+
+
+    // START
+    start.addEventListener("click", function () {
+
+        if (timer !== null) {
+            return;
+        }
+
+        timer = setInterval(() => {
+
+            store.disabled = false;
+
+            updateTime();
+
+        }, 1000);
+
+        start.disabled = true;
+
+    });
+
+
+    // STOP
+    stop.addEventListener("click", function () {
+
+        clearInterval(timer);
+
+        timer = null;
+
+        start.disabled = false;
+
+    });
+
+
+    // UPDATE TIME
+    function updateTime() {
+
+        second = second + 1;
+
+        let hrs = Math.floor(second / 3600);
+
+        let mins = Math.floor((second % 3600) / 60);
+
+        let sec = second % 60;
+
+
+        display.innerText =
+            hrs.toString().padStart(2, "0") + ":" +
+            mins.toString().padStart(2, "0") + ":" +
+            sec.toString().padStart(2, "0");
+
+    }
+
+</script>
+
+
+</body>
+
+</html>
